@@ -1,4 +1,7 @@
-﻿#include <time.h>
+﻿//12, 12, 12, 20, 14, 5, 2, 9, 1, 1, 12, 12, 10, 14, 13, 7
+
+
+#include <time.h>
 #include <conio.h>
 #include <stdio.h>
 #include <locale.h>
@@ -15,26 +18,14 @@ const short Lmin = 2;
 /// <summary>Максимальная размерность массива</summary>
 const size_t Nmax = 16;
 
-/// <summary>Функция дублирует в целочисленном массиве элементы, равные целому числу X</summary>
-/// <param name="A">Массив</param>
-/// <param name="N">Размер передаваемого массива</param>
-/// <param name="X">Повторяемое число</param>
-/// <returns>Размерность массива после его обработки</returns>
-UCHAR DoubleX(UCHAR *A, UCHAR N, short X);
 
-/// <summary>Функция выводит размер массива и все его элементы в порядке возрастания их индексов</summary>
-/// <param name="A">Массив</param>
-/// <param name="N">Размерность массива</param>
+void DoubleX(UCHAR *A, UCHAR &N, const short X);
 void PrintArray(UCHAR *A, UCHAR N);
-
-//<summary>Функция наполняет массив случайными числами</summary>
-//<param name="A">Массив</param>
-//<param name="N">Размерность массива</param>
 void RandArray(UCHAR *A, UCHAR N);
 
 int main()
 {
-   setlocale(LC_ALL, "");
+   setlocale(0, "");
 
    UCHAR A[Nmax] = { }, N = 0, X = 0;
    time_t t;
@@ -44,40 +35,53 @@ int main()
 
    if (N > Nmax) N = Nmax;
 
-   srand((unsigned) time(&t));
+   srand((UINT) time(&t));
    RandArray(A, N);
-   PrintArray(A, DoubleX(A, N, 7));
+   DoubleX(A, N, X);
+   PrintArray(A, N);
 
    return 0 * _getch();
 }
 
-UCHAR DoubleX(UCHAR *A, UCHAR N, short X)
+/// <summary>Функция дублирует в целочисленном массиве элементы, равные целому числу X</summary>
+/// <param name="A">Массив</param>
+/// <param name="N">Размер передаваемого массива</param>
+/// <param name="X">Повторяемое число</param>
+void DoubleX(UCHAR *A, UCHAR &N, const short X)
 {
-   // s - размер массива A, с учетом добавленных элементов
-   UCHAR s = N;
-   for (UCHAR i = 0; i < s - 1 && i < Nmax; i++)
+   for (UCHAR i = 0; i < N - 1; i++)
    {
       if (A[i] == X)
       {
-         UCHAR c = 1, l_in = i;
-         for ( ; A[i + c] == X; c++, l_in++);
+         // c - количество повторений X
+         UCHAR c = 1;
+         for (; A[i + c] == X; c++); // вычисляем длину серии из повторений X
 
-         for (UCHAR j = s + c - 1; l_in + c < s - 1 && j > l_in; j--) A[j] = A[j - c];
+         // Смещаем массив вправо, с учетом границ массива и выявленной длиной серии X.
+         for (UCHAR j = N + c - 1; i + 2 * c < Nmax && j > i + 2 * c - 1; j--)
+            A[j] = A[j - c];
 
-         for (UCHAR k = c; k > 0; k--, i+= 2) A[i + k] = X;
+         for (UCHAR k = c; k > 0; k--, i += 2)
+            A[i + k] = X; // дублируем элементы серии
 
-         s = s + c > Nmax ? Nmax : s + c;
+         // задаем размер массива
+         N = N + c > Nmax ? Nmax : N + c;
       }
    }
-
-   return s;
 }
+/// <summary>Функция выводит размер массива и все его элементы в порядке возрастания их индексов</summary>
+/// <param name="A">Массив</param>
+/// <param name="N">Размерность массива</param>
 void PrintArray(UCHAR *A, UCHAR N)
 {
    printf_s("Размер массива = %hi\nЭлементы массива: ", N);
-   for (size_t i = 0; i < N; i++) printf_s("%d ", A[i]);
+   for (size_t i = 0; i < N; i++) 
+      printf_s("%d ", A[i]);
    printf_s("\n");
 }
+//<summary>Функция наполняет массив случайными числами</summary>
+//<param name="A">Массив</param>
+//<param name="N">Размерность массива</param>
 void RandArray(UCHAR *A, UCHAR N)
 {
    for (size_t i = 0; i < N; i++)
